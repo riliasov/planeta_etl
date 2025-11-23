@@ -1,9 +1,10 @@
+"""Модуль для подключения к базе данных Supabase/PostgreSQL."""
 import psycopg2
 from sqlalchemy import create_engine
 
 def get_db_connection(config):
     """
-    Returns a raw psycopg2 connection.
+    Создает и возвращает подключение к БД через psycopg2.
     """
     try:
         conn = psycopg2.connect(config['SUPABASE_DB_URL'])
@@ -13,7 +14,7 @@ def get_db_connection(config):
 
 def get_db_engine(config):
     """
-    Returns a SQLAlchemy engine.
+    Создает и возвращает SQLAlchemy engine для работы с БД.
     """
     try:
         engine = create_engine(config['SUPABASE_DB_URL'])

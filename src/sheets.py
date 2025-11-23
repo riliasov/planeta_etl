@@ -1,10 +1,23 @@
+"""Модуль для работы с Google Sheets API (только чтение)."""
 import gspread
 from oauth2client.service_account import ServiceAccountCredentials
 import os
 
 def get_sheets_client(config):
     """
-    Returns an authenticated gspread client.
+    Создает и возвращает авторизованный клиент gspread для чтения Google Sheets.
+    
+    Используются read-only права (spreadsheets.readonly, drive.readonly).
+    
+    Args:
+        config (dict): Словарь конфигурации с ключом 'GOOGLE_SHEETS_CREDENTIALS_FILE'
+    
+    Returns:
+        gspread.Client: Авторизованный клиент для работы с Google Sheets
+    
+    Raises:
+        FileNotFoundError: Если файл с credentials не найден
+        Exception: При ошибке авторизации
     """
     creds_file = config['GOOGLE_SHEETS_CREDENTIALS_FILE']
     

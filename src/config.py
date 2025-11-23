@@ -1,7 +1,17 @@
+"""Модуль конфигурации для загрузки переменных окружения и источников данных."""
 import os
 from dotenv import load_dotenv
 
 def load_config():
+    """
+    Загружает конфигурацию приложения из переменных окружения и файлов.
+    
+    Returns:
+        dict: Словарь с конфигурацией, включая:
+            - SUPABASE_DB_URL: URL подключения к Supabase/PostgreSQL
+            - GOOGLE_SHEETS_CREDENTIALS_FILE: Путь к JSON файлу с credentials
+            - SOURCES: Словарь с описанием источников данных (из secrets/sources.json)
+    """
     load_dotenv()
     
     config = {
@@ -22,9 +32,9 @@ def load_config():
         # Fallback to default expected path for error message clarity
         config['GOOGLE_SHEETS_CREDENTIALS_FILE'] = 'secrets/credentials.json'
     
-    # Basic validation
-    if not config['SUPABASE_DB_URL']:
-        raise ValueError("Missing SUPABASE_DB_URL environment variable")
+    # Basic validation (DB URL не обязателен для тестирования подключения к Sheets)
+    # if not config['SUPABASE_DB_URL']:
+    #     raise ValueError("Missing SUPABASE_DB_URL environment variable")
 
     # Load sources
     sources_path = os.path.join(os.path.dirname(__file__), '..', 'secrets', 'sources.json')
