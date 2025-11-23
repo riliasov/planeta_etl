@@ -1,0 +1,66 @@
+{
+    "_comment": "Источники данных сгруппированы по spreadsheet_id для удобства",
+    "_note": "ВАЖНО: Если переименуете лист - обновите sheet_names здесь! Альтернатива: используйте gid (см. docs/sheet_naming.md)",
+
+    "historical_sales": {
+        "spreadsheet_id": "1kt8CeDDEpJuDLX6nsr2_ZxAl4L0jg9p83wqS0VEFFr0",
+        "sheet_names": ["Продажи_hst"],
+        "ranges": {
+            "Продажи_hst": "A1:R"
+        }
+    },
+    "clients_data": {
+        "spreadsheet_id": "1kt8CeDDEpJuDLX6nsr2_ZxAl4L0jg9p83wqS0VEFFr0",
+        "sheet_names": ["Клиент_hst"],
+        "ranges": {
+            "Клиент_hst": "B3:W"
+        }
+    },
+    "historical_expenses": {
+        "spreadsheet_id": "1kt8CeDDEpJuDLX6nsr2_ZxAl4L0jg9p83wqS0VEFFr0",
+        "sheet_names": ["Расходы_hst"],
+        "ranges": {
+            "Расходы_hst": "A1:N"
+        }
+    },
+    "historical_trainings": {
+        "spreadsheet_id": "1kt8CeDDEpJuDLX6nsr2_ZxAl4L0jg9p83wqS0VEFFr0",
+        "sheet_names": ["Тренировки_hst"],
+        "ranges": {
+            "Тренировки_hst": "A1:R"
+        },
+        "_note": "Укажите правильное название листа и range"
+    },
+
+    "current_sales": {
+        "spreadsheet_id": "1-kEt2r-mzqI6PmtFqcFaS7XVAPdlde5FxYMv4DXwd94",
+        "sheet_names": ["Продажи"],
+        "ranges": {
+            "Продажи": "A2:T"
+        }
+    },
+    "current_trainings": {
+        "spreadsheet_id": "1-kEt2r-mzqI6PmtFqcFaS7XVAPdlde5FxYMv4DXwd94",
+        "sheet_names": ["Тренировки"],
+        "ranges": {
+            "Тренировки": "A2:J"
+        },
+        "_note": "Укажите правильное название листа и range"
+    },
+
+    "current_expenses": {
+        "spreadsheet_id": "1VxLw1ivJ4u2fU1MJOXwdABvsGE7VhegeLBSBT2qzbuo",
+        "sheet_names": ["Расходы"],
+        "ranges": {
+            "Расходы": "A2:N"
+        }
+    },
+
+    "references": {
+        "spreadsheet_id": "1kYEefSBzxuGGFMoT2v-t0vWlGb7liERE8R_KEyFuNtc",
+        "sheet_names": ["Спр_Прайс"],
+        "ranges": {
+            "Спр_Прайс": "A1:I40"
+        }
+    }
+}

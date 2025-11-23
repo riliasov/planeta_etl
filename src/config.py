@@ -40,8 +40,15 @@ def load_config():
     sources_path = os.path.join(os.path.dirname(__file__), '..', 'secrets', 'sources.json')
     if os.path.exists(sources_path):
         import json
-        with open(sources_path, 'r') as f:
-            config['SOURCES'] = json.load(f)
+        with open(sources_path, 'r', encoding='utf-8') as f:
+            content = f.read()
+            # Удаляем комментарии из JSON (строки начинающиеся с "_comment" или "_note")
+            sources_data = json.loads(content)
+            # Фильтруем только валидные источники (не комментарии)
+            config['SOURCES'] = {
+                k: v for k, v in sources_data.items() 
+                if not k.startswith('_') and isinstance(v, dict)
+            }
     else:
         config['SOURCES'] = {}
         

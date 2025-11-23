@@ -1,0 +1,79 @@
+{
+    "_comment": "Пример конфигурации С ИСПОЛЬЗОВАНИЕМ GID (защита от переименования)",
+    "_note": "Если use_gid: true, то в sheet_identifiers указываются gid, а не названия",
+
+    "historical_sales": {
+        "spreadsheet_id": "1kt8CeDDEpJuDLX6nsr2_ZxAl4L0jg9p83wqS0VEFFr0",
+        "use_gid": true,
+        "sheet_identifiers": ["294381083"],
+        "ranges": {
+            "294381083": "A1:R"
+        },
+        "_hint": "Продажи_hst"
+    },
+    "clients_data": {
+        "spreadsheet_id": "1kt8CeDDEpJuDLX6nsr2_ZxAl4L0jg9p83wqS0VEFFr0",
+        "use_gid": true,
+        "sheet_identifiers": ["1318679629"],
+        "ranges": {
+            "1318679629": "B3:W"
+        },
+        "_hint": "Клиент_hst"
+    },
+    "historical_expenses": {
+        "spreadsheet_id": "1kt8CeDDEpJuDLX6nsr2_ZxAl4L0jg9p83wqS0VEFFr0",
+        "use_gid": true,
+        "sheet_identifiers": ["678151176"],
+        "ranges": {
+            "678151176": "A1:N"
+        },
+        "_hint": "Расходы_hst"
+    },
+    "historical_trainings": {
+        "spreadsheet_id": "1kt8CeDDEpJuDLX6nsr2_ZxAl4L0jg9p83wqS0VEFFr0",
+        "use_gid": true,
+        "sheet_identifiers": ["1195769572"],
+        "ranges": {
+            "1195769572": "A1:R"
+        },
+        "_hint": "Тренировки_hst"
+    },
+
+    "current_sales": {
+        "spreadsheet_id": "1-kEt2r-mzqI6PmtFqcFaS7XVAPdlde5FxYMv4DXwd94",
+        "use_gid": true,
+        "sheet_identifiers": ["623132210"],
+        "ranges": {
+            "623132210": "A2:T"
+        },
+        "_hint": "Продажи"
+    },
+    "current_trainings": {
+        "spreadsheet_id": "1-kEt2r-mzqI6PmtFqcFaS7XVAPdlde5FxYMv4DXwd94",
+        "use_gid": true,
+        "sheet_identifiers": ["1856560934"],
+        "ranges": {
+            "1856560934": "A2:J"
+        },
+        "_hint": "Тренировки"
+    },
+
+    "current_expenses": {
+        "spreadsheet_id": "ПРОВЕРЬТЕ_ДОСТУП",
+        "use_gid": false,
+        "sheet_identifiers": ["Расходы"],
+        "ranges": {
+            "Расходы": "A2:N"
+        }
+    },
+
+    "references": {
+        "spreadsheet_id": "1kYEefSBzxuGGFMoT2v-t0vWlGb7liERE8R_KEyFuNtc",
+        "use_gid": true,
+        "sheet_identifiers": ["1546502281"],
+        "ranges": {
+            "1546502281": "A1:I40"
+        },
+        "_hint": "Спр_Прайс"
+    }
+}
