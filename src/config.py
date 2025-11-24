@@ -1,65 +1,136 @@
-"""Модуль конфигурации для загрузки переменных окружения и источников данных."""
+"""Type-safe configuration management using Pydantic."""
 import os
-from dotenv import load_dotenv
+import json
+from pathlib import Path
+from typing import Dict, Any, Optional
+from pydantic import Field, field_validator
+from pydantic_settings import BaseSettings, SettingsConfigDict
 
-def load_config():
+
+class AppConfig(BaseSettings):
+    """Application configuration with validation."""
+    
+    # Database
+    supabase_db_url: str = Field(
+        ..., 
+        description="PostgreSQL/Supabase database connection URL"
+    )
+    
+    # Google Sheets
+    google_sheets_credentials_file: Optional[str] = Field(
+        None,
+        description="Path to Google Sheets service account JSON file"
+    )
+    
+    # Sources (loaded separately from JSON)
+    _sources: Dict[str, Any] = {}
+    
+    model_config = SettingsConfigDict(
+        env_file='.env',
+        env_file_encoding='utf-8',
+        case_sensitive=False,
+        extra='ignore'
+    )
+    
+    @field_validator('supabase_db_url')
+    @classmethod
+    def validate_db_url(cls, v: str) -> str:
+        """Validate database URL format."""
+        if not v.startswith(('postgres://', 'postgresql://')):
+            raise ValueError('Database URL must start with postgres:// or postgresql://')
+        return v
+    
+    @field_validator('google_sheets_credentials_file')
+    @classmethod
+    def validate_credentials_file(cls, v: Optional[str]) -> Optional[str]:
+        """Auto-detect credentials file if not specified."""
+        if v and Path(v).exists():
+            return v
+        
+        # Auto-detect in secrets directory
+        secrets_dir = Path(__file__).parent.parent / 'secrets'
+        if secrets_dir.exists():
+            for file in secrets_dir.iterdir():
+                if file.suffix == '.json' and 'sources' not in file.name:
+                    return str(file)
+        
+        return v
+    
+    def load_sources(self) -> Dict[str, Any]:
+        """Load sources configuration from JSON file."""
+        if self._sources:
+            return self._sources
+        
+        # Try src/sources.json first (new location)
+        sources_path = Path(__file__).parent / 'sources.json'
+        
+        # Fallback to secrets/sources.json (old location)
+        if not sources_path.exists():
+            sources_path = Path(__file__).parent.parent / 'secrets' / 'sources.json'
+        
+        if sources_path.exists():
+            with open(sources_path, 'r', encoding='utf-8') as f:
+                sources_data = json.load(f)
+                # Filter out comments (keys starting with '_')
+                self._sources = {
+                    k: v for k, v in sources_data.items()
+                    if not k.startswith('_') and isinstance(v, dict)
+                }
+        
+        return self._sources
+    
+    @property
+    def sources(self) -> Dict[str, Any]:
+        """Get sources configuration."""
+        return self.load_sources()
+
+
+# Singleton instance
+_config: Optional[AppConfig] = None
+
+
+def load_config() -> dict:
     """
-    Загружает конфигурацию приложения из переменных окружения и файлов.
+    Load and return configuration (backward compatible with old dict interface).
     
     Returns:
-        dict: Словарь с конфигурацией, включая:
-            - SUPABASE_DB_URL: URL подключения к Supabase/PostgreSQL
-            - GOOGLE_SHEETS_CREDENTIALS_FILE: Путь к JSON файлу с credentials
-            - SOURCES: Словарь с описанием источников данных (из secrets/sources.json)
+        dict: Configuration dictionary with keys:
+            - SUPABASE_DB_URL
+            - GOOGLE_SHEETS_CREDENTIALS_FILE
+            - SOURCES
     """
-    # Явно указываем путь к .env в папке secrets
-    env_path = os.path.join(os.path.dirname(__file__), '..', 'secrets', '.env')
-    load_dotenv(env_path)
-    # Также пробуем загрузить из корня (на случай если там тоже есть)
-    load_dotenv()
+    global _config
     
-    config = {
-        'SUPABASE_DB_URL': os.getenv('SUPABASE_DB_URL'),
-        'GOOGLE_SHEETS_CREDENTIALS_FILE': os.getenv('GOOGLE_SHEETS_CREDENTIALS_FILE'),
+    if _config is None:
+        # Try loading from secrets/.env first
+        env_path = Path(__file__).parent.parent / 'secrets' / '.env'
+        if env_path.exists():
+            _config = AppConfig(_env_file=str(env_path))
+        else:
+            _config = AppConfig()
+    
+    # Return dict for backward compatibility
+    return {
+        'SUPABASE_DB_URL': _config.supabase_db_url,
+        'GOOGLE_SHEETS_CREDENTIALS_FILE': _config.google_sheets_credentials_file,
+        'SOURCES': _config.sources,
     }
 
-    # Auto-detect credentials in secrets if not set or not found
-    if not config['GOOGLE_SHEETS_CREDENTIALS_FILE'] or not os.path.exists(config['GOOGLE_SHEETS_CREDENTIALS_FILE']):
-        secrets_dir = os.path.join(os.path.dirname(__file__), '..', 'secrets')
-        if os.path.exists(secrets_dir):
-            for file in os.listdir(secrets_dir):
-                if file.endswith('.json') and 'sources' not in file:
-                    config['GOOGLE_SHEETS_CREDENTIALS_FILE'] = os.path.join(secrets_dir, file)
-                    break
-    
-    if not config['GOOGLE_SHEETS_CREDENTIALS_FILE']:
-        # Fallback to default expected path for error message clarity
-        config['GOOGLE_SHEETS_CREDENTIALS_FILE'] = 'secrets/credentials.json'
-    
-    # Basic validation (DB URL не обязателен для тестирования подключения к Sheets)
-    # if not config['SUPABASE_DB_URL']:
-    #     raise ValueError("Missing SUPABASE_DB_URL environment variable")
 
-    # Load sources
-    # 1. Сначала ищем в папке src/ (новое расположение)
-    sources_path = os.path.join(os.path.dirname(__file__), 'sources.json')
+def get_config() -> AppConfig:
+    """
+    Get typed configuration object.
     
-    # 2. Если нет, ищем в secrets/ (старое расположение)
-    if not os.path.exists(sources_path):
-        sources_path = os.path.join(os.path.dirname(__file__), '..', 'secrets', 'sources.json')
+    Returns:
+        AppConfig: Pydantic config model
+    """
+    global _config
     
-    if os.path.exists(sources_path):
-        import json
-        with open(sources_path, 'r', encoding='utf-8') as f:
-            content = f.read()
-            # Удаляем комментарии из JSON (строки начинающиеся с "_comment" или "_note")
-            sources_data = json.loads(content)
-            # Фильтруем только валидные источники (не комментарии)
-            config['SOURCES'] = {
-                k: v for k, v in sources_data.items() 
-                if not k.startswith('_') and isinstance(v, dict)
-            }
-    else:
-        config['SOURCES'] = {}
-        
-    return config
+    if _config is None:
+        env_path = Path(__file__).parent.parent / 'secrets' / '.env'
+        if env_path.exists():
+            _config = AppConfig(_env_file=str(env_path))
+        else:
+            _config = AppConfig()
+    
+    return _config
