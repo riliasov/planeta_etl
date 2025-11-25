@@ -5,6 +5,9 @@ import sqlalchemy
 from sqlalchemy import text
 from datetime import datetime
 
+from src.logger import get_logger
+logger = get_logger(__name__)
+
 class DataLoader:
     def __init__(self, db_engine):
         self.engine = db_engine
@@ -29,10 +32,10 @@ class DataLoader:
             source_name (str): Имя источника (для логов)
         """
         if df.empty:
-            print(f"⚠️  Нет данных для загрузки в {table_name}")
+            logger.info(f"⚠️  Нет данных для загрузки в {table_name}")
             return 0
 
-        print(f"📥 Загрузка {len(df)} строк в staging.{table_name}...")
+        logger.info(f"📥 Загрузка {len(df)} строк в staging.{table_name}...")
 
         # 1. Подготовка данных
         # Добавляем row_hash
@@ -54,7 +57,7 @@ class DataLoader:
                 result = conn.execute(text(f"SELECT row_hash FROM staging.{table_name}"))
                 existing_hashes = {row[0] for row in result}
         except Exception as e:
-            print(f"⚠️  Ошибка чтения существующих хэшей (возможно таблица пуста): {e}")
+            logger.error(f"⚠️  Ошибка чтения существующих хэшей (возможно таблица пуста): {e}")
 
         # 3. Фильтрация новых строк
         new_records = [
@@ -63,10 +66,10 @@ class DataLoader:
         ]
         
         if not new_records:
-            print(f"   ✅ Нет новых данных для {table_name} (все {len(records)} строк уже в базе)")
+            logger.info(f"   ✅ Нет новых данных для {table_name} (все {len(records)} строк уже в базе)")
             return 0
             
-        print(f"   🚀 Найдено {len(new_records)} новых/измененных строк. Вставка...")
+        logger.info(f"   🚀 Найдено {len(new_records)} новых/измененных строк. Вставка...")
         
         # 4. Вставка (Bulk Insert)
         # Используем pandas to_sql или sqlalchemy insert
@@ -87,11 +90,11 @@ class DataLoader:
                 method='multi',
                 chunksize=1000 # Разбиваем на пачки
             )
-            print(f"   ✅ Успешно загружено {len(new_records)} строк.")
+            logger.info(f"   ✅ Успешно загружено {len(new_records)} строк.")
             return len(new_records)
             
         except Exception as e:
-            print(f"❌ Ошибка при вставке в {table_name}: {e}")
+            logger.error(f"❌ Ошибка при вставке в {table_name}: {e}")
             return 0
 
     def load_raw_json(self, data_list, table_name, spreadsheet_id, sheet_id):
