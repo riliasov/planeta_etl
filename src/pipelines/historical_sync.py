@@ -12,15 +12,18 @@ from src.sheets import get_sheets_client, read_sheet_data
 from src.etl.loader import DataLoader
 from src.etl.data_cleaner import clean_dataframe
 from src.utils.infer_schema import clean_column_name
+from src.logger import get_logger
+
+logger = get_logger(__name__)
 
 def run_historical_sync():
-    print("📚 Запуск синхронизации ИСТОРИЧЕСКИХ данных (Historical Sync)...")
+    logger.info("📚 Запуск синхронизации ИСТОРИЧЕСКИХ данных (Historical Sync)...")
     
     config = load_config()
     db_url = config.get('SUPABASE_DB_URL')
     
     if not db_url:
-        print("❌ Ошибка: Нет подключения к БД")
+        logger.info("❌ Ошибка: Нет подключения к БД")
         return
 
     # Инициализация
@@ -47,7 +50,7 @@ def run_historical_sync():
         process_source(gc, loader, sources['clients_data'], 'clients_data', 'clients_hst')
 
 def process_source(gc, loader, source_config, source_name, target_table):
-    print(f"\n📦 Обработка {source_name} -> staging.{target_table}...")
+    logger.info(f"\n📦 Обработка {source_name} -> staging.{target_table}...")
     
     spreadsheet_id = source_config.get('spreadsheet_id')
     sheet_identifiers = source_config.get('sheet_identifiers', [])
@@ -55,19 +58,19 @@ def process_source(gc, loader, source_config, source_name, target_table):
     use_gid = source_config.get('use_gid', False)
     
     if not sheet_identifiers:
-        print("   ⚠️ Нет идентификаторов листов")
+        logger.info("   ⚠️ Нет идентификаторов листов")
         return
 
     # Для исторических данных может быть несколько листов (например, по годам)
     # Проходим по всем
     for sheet_id in sheet_identifiers:
         range_name = ranges.get(sheet_id)
-        print(f"   📄 Лист: {sheet_id}...")
+        logger.info(f"   📄 Лист: {sheet_id}...")
         
         try:
             data = read_sheet_data(gc, spreadsheet_id, sheet_id, range_name, use_gid)
             if not data or len(data) < 2:
-                print("      ⚠️ Нет данных или пустой лист")
+                logger.info("      ⚠️ Нет данных или пустой лист")
                 continue
                 
             headers = data[0]
@@ -138,7 +141,7 @@ def process_source(gc, loader, source_config, source_name, target_table):
             loader.load_staging(df_cleaned, target_table, source_name)
             
         except Exception as e:
-            print(f"❌ Ошибка обработки листа {sheet_id}:")
+            logger.info(f"❌ Ошибка обработки листа {sheet_id}:")
             traceback.print_exc()
 
 if __name__ == "__main__":

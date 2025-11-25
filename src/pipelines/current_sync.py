@@ -12,15 +12,18 @@ from src.sheets import get_sheets_client, read_sheet_data
 from src.etl.loader import DataLoader
 from src.etl.data_cleaner import clean_dataframe
 from src.utils.infer_schema import clean_column_name
+from src.logger import get_logger
+
+logger = get_logger(__name__)
 
 def run_current_sync():
-    print("🔄 Запуск синхронизации ТЕКУЩИХ данных (Current Sync)...")
+    logger.info("🔄 Запуск синхронизации ТЕКУЩИХ данных (Current Sync)...")
     
     config = load_config()
     db_url = config.get('SUPABASE_DB_URL')
     
     if not db_url:
-        print("❌ Ошибка: Нет подключения к БД")
+        logger.info("❌ Ошибка: Нет подключения к БД")
         return
 
     # Инициализация
@@ -43,7 +46,7 @@ def run_current_sync():
         process_source(gc, loader, sources['current_trainings'], 'current_trainings', 'trainings_cur')
 
 def process_source(gc, loader, source_config, source_name, target_table):
-    print(f"\n📦 Обработка {source_name} -> staging.{target_table}...")
+    logger.info(f"\n📦 Обработка {source_name} -> staging.{target_table}...")
     
     spreadsheet_id = source_config.get('spreadsheet_id')
     sheet_identifiers = source_config.get('sheet_identifiers', [])
@@ -51,7 +54,7 @@ def process_source(gc, loader, source_config, source_name, target_table):
     use_gid = source_config.get('use_gid', False)
     
     if not sheet_identifiers:
-        print("   ⚠️ Нет идентификаторов листов")
+        logger.info("   ⚠️ Нет идентификаторов листов")
         return
 
     # Читаем первый лист (обычно он один для current)
@@ -61,7 +64,7 @@ def process_source(gc, loader, source_config, source_name, target_table):
     try:
         data = read_sheet_data(gc, spreadsheet_id, sheet_id, range_name, use_gid)
         if not data or len(data) < 2:
-            print("   ⚠️ Нет данных или пустой лист")
+            logger.info("   ⚠️ Нет данных или пустой лист")
             return
             
         headers = data[0]
@@ -140,7 +143,7 @@ def process_source(gc, loader, source_config, source_name, target_table):
         loader.load_staging(df_cleaned, target_table, source_name)
         
     except Exception as e:
-        print(f"❌ Ошибка обработки {source_name}:")
+        logger.info(f"❌ Ошибка обработки {source_name}:")
         traceback.print_exc()
 
 
