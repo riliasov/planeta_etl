@@ -1,19 +1,7 @@
-"""
-Скрипт для генерации черновиков справочников на основе исторических данных из Google Sheets.
-Извлекает уникальные значения для:
-- Сотрудников (Тренеры, Админы)
-- Продуктов (Абонементы)
-- Категорий и Типов
 
-Сохраняет результат в 'references_draft.json' для проверки пользователем.
-"""
-import sys
-import os
 import json
 import pandas as pd
 from collections import Counter
-
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../../')))
 
 from src.config import load_config
 from src.sheets import get_sheets_client, read_sheet_data

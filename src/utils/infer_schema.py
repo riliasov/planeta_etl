@@ -1,14 +1,7 @@
-"""
-Скрипт для автоматического определения SQL-типов данных на основе содержимого Google Sheets.
-Читает данные, анализирует каждую колонку и предлагает схему таблицы.
-"""
-import sys
-import os
+"""Автоматическое определение SQL-типов данных на основе содержимого Google Sheets."""
 import pandas as pd
 import re
 from dateutil import parser
-
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../../')))
 
 from src.config import load_config
 from src.sheets import get_sheets_client, read_sheet_data

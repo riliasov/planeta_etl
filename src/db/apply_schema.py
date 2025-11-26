@@ -1,10 +1,5 @@
-import sys
-import os
 import sqlalchemy
 from sqlalchemy import text
-
-# Добавляем корень проекта в путь
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../../')))
 
 from src.config import load_config
 

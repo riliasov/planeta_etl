@@ -15,9 +15,6 @@ import sqlalchemy
 import time
 from datetime import datetime
 
-# Добавляем корень
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../../')))
-
 from src.config import load_config
 from src.sheets import get_sheets_client
 from src.data_marts.aggregator import build_all_datamarts

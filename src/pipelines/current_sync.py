@@ -1,9 +1,4 @@
-import sys
-import os
 from typing import Dict
-
-# Добавляем корень
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../../')))
 
 from src.core.etl_pipeline import ETLPipeline
 from src.config import load_config
