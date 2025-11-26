@@ -4,12 +4,19 @@
 import re
 import pandas as pd
 import warnings
+from typing import Optional
+from src.core.constants import (
+    NUMERIC_KEYWORDS,
+    DATE_KEYWORDS,
+    BOOLEAN_COLUMNS,
+    SERVICE_COLUMNS
+)
 
 # Подавляем предупреждения pandas о форматах дат
 warnings.filterwarnings('ignore', message='Could not infer format')
 
 
-def clean_dataframe(df, table_name=None):
+def clean_dataframe(df: pd.DataFrame, table_name: Optional[str] = None) -> pd.DataFrame:
     """
     Очищает данные перед загрузкой:
     1. Числа: удаляет пробелы, конвертирует.
@@ -24,28 +31,19 @@ def clean_dataframe(df, table_name=None):
     Returns:
         pd.DataFrame: Очищенный DataFrame
     """
-    numeric_keywords = [
-        'stoimost', 'summa', 'kolichestvo', 'bonus', 'nalichnye', 
-        'perevod', 'terminal', 'vdolg', 'zp', 'oplata', 'stavka', 'spisano',
-        'god', 'mesyats', 'chasy'
-    ]
-    
-    boolean_cols = ['probili_na_evotore', 'vnesli_v_crm', 'relevant', 'zamena']
-    
     for col in df.columns:
         # Пропускаем служебные
-        if col in ['source_row_id', 'row_hash']:
+        if col in SERVICE_COLUMNS:
             continue
             
         # 1. Даты
-        date_keywords = ['data', 'date', 'zapis']
-        if any(k in col for k in date_keywords):
+        if any(k in col for k in DATE_KEYWORDS):
             # dayfirst=True для DD.MM.YYYY
             df[col] = pd.to_datetime(df[col], dayfirst=True, errors='coerce')
             continue
 
         # 2. Числа
-        is_numeric = any(k in col for k in numeric_keywords)
+        is_numeric = any(k in col for k in NUMERIC_KEYWORDS)
         if is_numeric:
             if df[col].dtype == 'object':
                 # Удаляем пробелы только для чисел и меняем запятую на точку
@@ -55,7 +53,7 @@ def clean_dataframe(df, table_name=None):
             continue
             
         # 3. Boolean
-        if col in boolean_cols:
+        if col in BOOLEAN_COLUMNS:
             df[col] = df[col].map({
                 'TRUE': True, 'True': True, 'true': True, '1': True, 1: True,
                 'FALSE': False, 'False': False, 'false': False, '0': False, 0: False,

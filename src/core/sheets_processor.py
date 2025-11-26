@@ -1,5 +1,5 @@
 import pandas as pd
-from typing import Dict, List, Optional
+from typing import Dict, List, Optional, Any
 from src.sheets import get_sheets_client, read_sheet_data
 from src.utils.infer_schema import clean_column_name
 from src.logger import get_logger
@@ -74,10 +74,10 @@ class SheetsProcessor:
         except Exception:
             return None
     
-    def _normalize_headers(self, headers: List) -> List[str]:
+    def _normalize_headers(self, headers: List[Any]) -> List[str]:
         """Нормализует заголовки (уникализация, транслитерация)."""
-        seen = {}
-        unique_headers = []
+        seen: Dict[str, int] = {}
+        unique_headers: List[str] = []
         
         for h in headers:
             h_str = str(h).strip()
@@ -93,7 +93,7 @@ class SheetsProcessor:
         
         return unique_headers
     
-    def _align_rows(self, rows: List[List], expected_cols: int) -> List[List]:
+    def _align_rows(self, rows: List[List[Any]], expected_cols: int) -> List[List[Any]]:
         """Выравнивает строки по количеству колонок."""
         aligned = []
         for row in rows:
