@@ -1,0 +1,42 @@
+name: Scheduled ETL
+
+on:
+  schedule:
+    - cron: '0 */6 * * *'  # Run every 6 hours
+  workflow_dispatch:      # Allow manual trigger
+
+jobs:
+  run-etl:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.13'
+        cache: 'pip'
+        
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+        
+    - name: Create secrets directory
+      run: mkdir -p secrets
+      
+    - name: Write Google Sheets Credentials
+      env:
+        GOOGLE_SHEETS_CREDENTIALS_JSON: ${{ secrets.GOOGLE_SHEETS_CREDENTIALS_JSON }}
+      run: |
+        echo "$GOOGLE_SHEETS_CREDENTIALS_JSON" > secrets/planeta_sheets_key.json
+        
+    - name: Run ETL
+      env:
+        SUPABASE_DB_URL: ${{ secrets.SUPABASE_DB_URL }}
+        GOOGLE_SHEETS_CREDENTIALS_FILE: secrets/planeta_sheets_key.json
+        PYTHONPATH: .
+      run: |
+        python main.py --scope all
